@@ -1,15 +1,14 @@
 name: threads-post
 on:
   schedule:
-    # UTC 기준 (KST-9). 08:30 12:10 15:30 19:40 22:10 KST, 매 슬롯 10분 뒤까지 대기 글을 처리
-    - cron: "35 23 * * *"
-    - cron: "15 3 * * *"
-    - cron: "35 6 * * *"
-    - cron: "45 10 * * *"
-    - cron: "15 13 * * *"
+    # GitHub 예약은 자주 밀리므로 10분마다 확인. 글은 날짜·시간이 지난 "검토 완료" 행만 한 번에 하나씩 올라감
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: threads-post
+  cancel-in-progress: false
 jobs:
   post:
     runs-on: ubuntu-latest
