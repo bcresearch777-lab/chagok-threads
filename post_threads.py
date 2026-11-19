@@ -6,7 +6,14 @@ import csv, os, sys, time, datetime as dt, requests
 
 API = "https://graph.threads.net/v1.0"
 TOKEN = os.environ["THREADS_TOKEN"]
-USER = os.environ["THREADS_USER_ID"]
+def get_user_id():
+    r = requests.get(f"{API}/me", params={"fields": "id", "access_token": TOKEN}, timeout=60)
+    if not r.ok:
+        sys.exit(f"token check failed {r.status_code}: {r.text}")
+    return r.json()["id"]
+
+
+USER = os.environ.get("THREADS_USER_ID") or get_user_id()
 RAW = os.environ.get("MEDIA_BASE_URL", "")  # 예: https://raw.githubusercontent.com/<id>/<repo>/main/media
 MARK = "▼ 댓글 이어쓰기"
 KST = dt.timezone(dt.timedelta(hours=9))
