@@ -1,0 +1,28 @@
+name: threads-post
+on:
+  schedule:
+    # UTC 기준 (KST-9). 08:30 12:10 15:30 19:40 22:10 KST, 매 슬롯 10분 뒤까지 대기 글을 처리
+    - cron: "35 23 * * *"
+    - cron: "15 3 * * *"
+    - cron: "35 6 * * *"
+    - cron: "45 10 * * *"
+    - cron: "15 13 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests
+      - run: python post_threads.py
+        env:
+          THREADS_TOKEN: ${{ secrets.THREADS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/media
+      - run: |
+          git config user.name "bot" && git config user.email "bot@users.noreply.github.com"
+          git add posts.csv && (git diff --cached --quiet || git commit -m "posted" && git push)
